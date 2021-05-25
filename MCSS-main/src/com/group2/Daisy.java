@@ -10,11 +10,6 @@ public class Daisy {
     this.daisyType = daisyType;
   }
 
-  public Daisy(int age, DaisyType daisyType) {
-    this.age = age;
-    this.daisyType = daisyType;
-  }
-
   public int getAge() {
     return age;
   }

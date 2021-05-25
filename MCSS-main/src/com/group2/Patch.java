@@ -7,23 +7,8 @@ public class Patch {
 
 
 
+  public void calTemperature(){
 
-  public void calTemperature(double albedoOfSurface, double solarLuminosity){
-    double absorbedLuminosity =  0.0;
-    double localHeating = 0;
-    if(daisy == null){
-      absorbedLuminosity = (1 - albedoOfSurface) * solarLuminosity;
-    } else {
-      absorbedLuminosity = (1 - daisy.getAlbedoRate()) * solarLuminosity;
-    }
-
-    if(absorbedLuminosity > 0){
-      localHeating = 72 * Math.log(absorbedLuminosity) + 80;
-    }else {
-      localHeating = 80;
-    }
-
-    temperature = (temperature + localHeating) / 2;
   }
 
   public String getColor() {
@@ -65,7 +50,7 @@ public class Patch {
         this.color = "White";
       }
 
-      setDaisy(new Daisy(DT));
+      setDaisy(daisy);
       this.daisy.setAge(0);
 
 
