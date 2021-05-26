@@ -21,6 +21,15 @@ public class World {
   private double albedoOfSurface = 0.4;
   private double absorbLuminosity;
 
+
+  /**
+   * Initialize the world.
+   * @param row row of the world
+   * @param col column of the world
+   * @param solarLuminosity
+   * @param startWhitePercent
+   * @param startBlackPercent
+   */
   public World(int row, int col, double solarLuminosity, int startWhitePercent,
       int startBlackPercent) {
     this.world = new Patch[row][col];
@@ -36,13 +45,16 @@ public class World {
     this.col = col;
     this.startWhitePercent = startWhitePercent;
     this.startBlackPercent = startBlackPercent;
-    this.startBlackRandomly();
     this.startWhiteRandomly();
+    this.startBlackRandomly();
     this.setDaisyAge();
     this.meanTemperature();
 
   }
 
+  /**
+   * Ask evry patch calculte Temprature
+   */
   public void patchCalTemperature() {
     for (int i = 0; i < row; i++) {
       for (int j = 0; j < col; j++) {
@@ -52,58 +64,92 @@ public class World {
 
   }
 
+  /**
+   * Allocate half of the patch temperature to the surrounding patches.
+   */
   public void diffuseTemperature() {
     copyTheWorld();
+    // Calculate the patch on the edges.
     for (int i = 0; i < row; i++) {
       for (int j = 0; j < col; j++) {
-        world[i][j].setTemperature(world[i][j].getTemperature() / 2);
-        temp[i][j] = world[i][j].getTemperature() / 2;
+        if ((i == 0 && j == 0) || (i == 0 && j == col) || (i == row && j == 0) || (i == row
+            && j == col)) {
+          world[i][j].setTemperature(world[i][j].getTemperature() / 2);
+          temp[i][j] = world[i][j].getTemperature();
+          world[i][j]
+              .setTemperature(world[i][j].getTemperature() + world[i][j].getTemperature() * 5 / 8);
+        }
+
+        if ((i == 0 && j < col && j > 0) || (i == row && j < col && j > 0)
+            || (j == 0 && i < row && i > 0) || (j == col && i > 0 && i < row)) {
+          world[i][j].setTemperature(world[i][j].getTemperature() / 2);
+          temp[i][j] = world[i][j].getTemperature();
+          world[i][j]
+              .setTemperature(world[i][j].getTemperature() + world[i][j].getTemperature() * 3 / 8);
+        }
+
+        if (i > 0 && i < row && j > 0 && j < col) {
+          world[i][j].setTemperature(world[i][j].getTemperature() / 2);
+          temp[i][j] = world[i][j].getTemperature();
+        }
+
       }
     }
+
+    // Calculate temperature.
     for (int i = 0; i < row; i++) {
       for (int j = 0; j < col; j++) {
         double sumTmp = 0.0;
+        // world[0][0]
         if (i == 0 && j == 0) {
           sumTmp += temp[0][1] / 8;
           sumTmp += temp[1][1] / 8;
           sumTmp += temp[1][0] / 8;
         } else if (i == row - 1 && j == col - 1) {
+          // world[row - 1][col - 1]
           sumTmp += temp[row - 1][col - 2] / 8;
           sumTmp += temp[row - 2][col - 2] / 8;
           sumTmp += temp[row - 2][col - 1] / 8;
         } else if (i == row - 1 && j == 0) {
+          // world[row - 1][0]
           sumTmp += temp[row - 1][1] / 8;
           sumTmp += temp[row - 2][1] / 8;
           sumTmp += temp[row - 2][0] / 8;
         } else if (i == 0 && j == col - 1) {
+          // world[0][col - 1]
           sumTmp += temp[0][col - 2] / 8;
           sumTmp += temp[1][col - 2] / 8;
           sumTmp += temp[1][col - 1] / 8;
         } else if (i == 0) {
+          // world[0][j]
           sumTmp += temp[0][j - 1] / 8;
           sumTmp += temp[0][j + 1] / 8;
           sumTmp += temp[1][j - 1] / 8;
           sumTmp += temp[1][j + 1] / 8;
           sumTmp += temp[1][j] / 8;
         } else if (i == row - 1) {
+          // world[row - 1][j]
           sumTmp += temp[i][j - 1] / 8;
           sumTmp += temp[i][j + 1] / 8;
           sumTmp += temp[i - 1][j - 1] / 8;
           sumTmp += temp[i - 1][j + 1] / 8;
           sumTmp += temp[i - 1][j] / 8;
         } else if (j == 0) {
+          // world[i][0]
           sumTmp += temp[i - 1][j] / 8;
           sumTmp += temp[i + 1][j] / 8;
           sumTmp += temp[i - 1][j + 1] / 8;
           sumTmp += temp[i][j + 1] / 8;
           sumTmp += temp[i + 1][j + 1] / 8;
         } else if (j == col - 1) {
+          // world[i][col - 1]
           sumTmp += temp[i - 1][j] / 8;
           sumTmp += temp[i + 1][j] / 8;
           sumTmp += temp[i - 1][j - 1] / 8;
           sumTmp += temp[i][j - 1] / 8;
           sumTmp += temp[i + 1][j - 1] / 8;
         } else {
+          // world[i][j]
           sumTmp += temp[i - 1][j - 1] / 8;
           sumTmp += temp[i - 1][j] / 8;
           sumTmp += temp[i - 1][j + 1] / 8;
@@ -118,6 +164,9 @@ public class World {
     }
   }
 
+  /**
+   * Calculate the global average temperature.
+   */
   public void meanTemperature() {
     double total = 0.0;
     for (int i = 0; i < row; i++) {
@@ -129,6 +178,9 @@ public class World {
     globalTemperature = total / (row * col);
   }
 
+  /**
+   * Randomly generate white daisies when initializing the world.
+   */
   public void startWhiteRandomly() {
     int num = (int) (((double) startWhitePercent / 100.0) * ((double) row * (double) col) + 0.5);
     Random random = new Random();
@@ -142,6 +194,9 @@ public class World {
     }
   }
 
+  /**
+   * Randomly generate black daisies when initializing the world.
+   */
   public void startBlackRandomly() {
     int num = (int) (((double) startBlackPercent / 100.0) * ((double) row * (double) col) + 0.5);
     Random random = new Random();
@@ -155,6 +210,9 @@ public class World {
     }
   }
 
+  /**
+   * Update age of Daisy
+   */
   public void setDaisyAge() {
     Random random = new Random();
     for (int i = 0; i < row; i++) {
@@ -166,6 +224,9 @@ public class World {
     }
   }
 
+  /**
+   * Print the world
+   */
   public void printWorld() {
     DecimalFormat df = new DecimalFormat("######0.00");
     for (int i = 0; i < row; i++) {
@@ -187,6 +248,309 @@ public class World {
     }
   }
 
+  /**
+   * Update Daisy Age
+   */
+  public void updateDaisyAge() {
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        if (copyWorld[i][j].getDaisy() != null) {
+          int age = world[i][j].getDaisy().getAge() + 1;
+          world[i][j].getDaisy().setAge(age);
+          if (world[i][j].getDaisy().getAge() == 25) {
+            world[i][j].goDieDaisy();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Born new Daisy
+   */
+  public void bornNewDaisy() {
+
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        double sumTmp = 0.0;
+        double seedThreshold = ((0.1457 * world[i][j].getTemperature()) -
+            (0.0032 * (world[i][j].getTemperature() * world[i][j].getTemperature()))
+            - 0.6443);
+        double randomdouble = Math.random();
+        if (randomdouble < seedThreshold && world[i][j].getDaisy() != null) {
+          produce(i, j, world[i][j].getDaisy());
+        }
+      }
+    }
+  }
+
+  /**
+   * Produce a new daisy
+   * @param i row number
+   * @param j col number
+   * @param daisy daisy
+   */
+  public void produce(int i, int j, Daisy daisy) {
+    double sumTmp;
+    if (i == 0 && j == 0) {
+      // world[0][0]
+      if (world[0][1].getDaisy() == null) {
+        world[0][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][1].getDaisy() == null) {
+        world[1][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][0].getDaisy() == null) {
+        world[1][0].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (i == row - 1 && j == col - 1) {
+
+      if (world[row - 1][col - 2].getDaisy() == null) {
+        world[row - 1][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[row - 2][col - 2].getDaisy() == null) {
+        world[row - 2][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[row - 2][col - 1].getDaisy() == null) {
+        world[row - 2][col - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (i == row - 1 && j == 0) {
+      if (world[row - 1][1].getDaisy() == null) {
+        world[row - 1][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[row - 2][1].getDaisy() == null) {
+        world[row - 2][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[row - 2][0].getDaisy() == null) {
+        world[row - 2][0].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (i == 0 && j == col - 1) {
+
+      if (world[0][col - 2].getDaisy() == null) {
+        world[0][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][col - 2].getDaisy() == null) {
+        world[1][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][col - 1].getDaisy() == null) {
+        world[1][col - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (i == 0) {
+
+      if (world[0][j - 1].getDaisy() == null) {
+        world[0][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[0][j + 1].getDaisy() == null) {
+        world[0][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][j - 1].getDaisy() == null) {
+        world[1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][j + 1].getDaisy() == null) {
+        world[1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[1][j].getDaisy() == null) {
+        world[1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (i == row - 1) {
+
+      if (world[i][j - 1].getDaisy() == null) {
+        world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i][j + 1].getDaisy() == null) {
+        world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j - 1].getDaisy() == null) {
+        world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j + 1].getDaisy() == null) {
+        world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j].getDaisy() == null) {
+        world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else if (j == 0) {
+
+      if (world[i - 1][j].getDaisy() == null) {
+        world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j].getDaisy() == null) {
+        world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j + 1].getDaisy() == null) {
+        world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i][j + 1].getDaisy() == null) {
+        world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j + 1].getDaisy() == null) {
+        world[i + 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+
+    } else if (j == col - 1) {
+
+      if (world[i - 1][j].getDaisy() == null) {
+        world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j].getDaisy() == null) {
+        world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j - 1].getDaisy() == null) {
+        world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i][j - 1].getDaisy() == null) {
+        world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j - 1].getDaisy() == null) {
+        world[i + 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    } else {
+
+      if (world[i - 1][j - 1].getDaisy() == null) {
+        world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j].getDaisy() == null) {
+        world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i - 1][j + 1].getDaisy() == null) {
+        world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i][j - 1].getDaisy() == null) {
+        world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i][j + 1].getDaisy() == null) {
+        world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j - 1].getDaisy() == null) {
+        world[i + 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j].getDaisy() == null) {
+        world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+      if (world[i + 1][j + 1].getDaisy() == null) {
+        world[i + 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
+      }
+    }
+  }
+
+  /**
+   * Update Global Temperature
+   */
+  public void updateGlobalTemperature() {
+    double sum = 0;
+
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        sum += world[i][j].getTemperature();
+
+      }
+      globalTemperature = sum / (row * col);
+    }
+  }
+
+  /**
+   * Make a copy of this world
+   */
+  public void copyTheWorld() {
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+//        Patch patch = world[i][j];
+//        copyWorld[i][j] = patch;
+        copyWorld[i][j].setDaisy(world[i][j].getDaisy());
+        if (world[i][j].getDaisy() == null) {
+          copyWorld[i][j].setDaisy(world[i][j].getDaisy());
+        } else {
+          copyWorld[i][j].getDaisy().setAge(world[i][j].getDaisy().getAge());
+          copyWorld[i][j].getDaisy().setDaisyType(world[i][j].getDaisy().getDaisyType());
+        }
+        copyWorld[i][j].setTemperature(world[i][j].getTemperature());
+        copyWorld[i][j].setDaisy(world[i][j].getDaisy());
+
+      }
+    }
+  }
+
+
+  public void updateWorld() {
+    copyTheWorld();
+    patchCalTemperature();
+    diffuseTemperature();
+    updateGlobalTemperature();
+    updateDaisyAge();
+    //justifTem();
+    bornNewDaisy();
+
+//    System.out.println(globalTemperature);
+
+//    System.out.println(world[0][0].getTemperature());
+//    System.out.println(seedThreshold);
+
+  }
+
+  /**
+   * Calculate the population of white daisy.
+   * @return The population of wihte daisy.
+   */
+  public int calWhitePopulation() {
+    int res = 0;
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        Daisy daisy = world[i][j].getDaisy();
+        if (daisy != null && daisy.getDaisyType() == DaisyType.WHITE) {
+          res++;
+        }
+      }
+    }
+
+    return res;
+  }
+  /**
+   * Calculate the population of black daisy.
+   * @return The population of black daisy.
+   */
+  public int calBlackPopulation() {
+    int res = 0;
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        Daisy daisy = world[i][j].getDaisy();
+        if (daisy != null && daisy.getDaisyType() == DaisyType.BLACK) {
+          res++;
+        }
+      }
+    }
+
+    return res;
+  }
+
+  /**
+   * There was a species explosion for some reasons.
+   * @param prob Probability of a species outbreak.
+   */
+  public void explosion(double prob){
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        double randomdouble = Math.random();
+        if (randomdouble < prob && world[i][j].getDaisy() != null) {
+          produce(i, j, world[i][j].getDaisy());
+        }
+      }
+    }
+  }
+
+  /**
+   * A mass extinction occurred for some reasons.
+   * @param prob Probability of mass extinction.
+   */
+  public void extinct(double prob){
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        double randomdouble = Math.random();
+        if (randomdouble < prob && world[i][j].getDaisy() != null) {
+          world[i][j].setDaisy(null);
+        }
+      }
+    }
+  }
 
   public Patch[][] getWorld() {
     return world;
@@ -244,154 +608,4 @@ public class World {
     this.startWhitePercent = startWhitePercent;
   }
 
-  //update the age of each daisy, when the age is 25, then it dies immediately
-  public void updateDaisyAge() {
-    for (int i = 0; i < row; i++) {
-      for (int j = 0; j < col; j++) {
-        if (copyWorld[i][j].getDaisy() != null) {
-          int age = world[i][j].getDaisy().getAge() + 1;
-          world[i][j].getDaisy().setAge(age);
-          if (world[i][j].getDaisy().getAge() == 25) {
-            world[i][j].goDieDaisy();
-          }
-        }
-      }
-    }
-  }
-
-  public void bornNewDaisy() {
-
-    for (int i = 0; i < row; i++) {
-      for (int j = 0; j < col; j++) {
-        double sumTmp = 0.0;
-        double seedThreshold = ((0.1457 * world[i][j].getTemperature()) -
-            (0.0032 * (world[i][j].getTemperature() * world[i][j].getTemperature()))
-            - 0.6443);
-        double randomdouble = Math.random();
-        if (randomdouble < seedThreshold && world[i][j].getDaisy() != null) {
-          produce(i, j,  world[i][j].getDaisy());
-        }
-      }
-    }
-  }
-  public void produce(int i, int j, Daisy daisy){
-    double sumTmp;
-    if (i == 0 && j == 0) {
-      if(world[0][1].getDaisy() == null) world[0][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][1].getDaisy() == null) world[1][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][0].getDaisy() == null) world[1][0].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (i == row - 1 && j == col - 1) {
-
-      if(world[row - 1][col - 2].getDaisy() == null) world[row - 1][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[row - 2][col - 2].getDaisy() == null) world[row - 2][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[row - 2][col - 1].getDaisy() == null) world[row - 2][col - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (i == row - 1 && j == 0) {
-      if(world[row - 1][1].getDaisy() == null) world[row - 1][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[row - 2][1].getDaisy() == null) world[row - 2][1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[row - 2][0].getDaisy() == null) world[row - 2][0].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (i == 0 && j == col - 1) {
-
-      if(world[0][col - 2].getDaisy() == null) world[0][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][col - 2].getDaisy() == null) world[1][col - 2].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][col - 1].getDaisy() == null) world[1][col - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (i == 0) {
-
-      if(world[0][j - 1].getDaisy() == null) world[0][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[0][j + 1].getDaisy() == null) world[0][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][j - 1].getDaisy() == null) world[1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][j + 1].getDaisy() == null) world[1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[1][j].getDaisy() == null) world[1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (i == row - 1) {
-
-      if(world[i][j - 1].getDaisy() == null) world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i][j + 1].getDaisy() == null) world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j - 1].getDaisy() == null) world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j + 1].getDaisy() == null) world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j].getDaisy() == null) world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else if (j == 0) {
-
-
-      if(world[i - 1][j].getDaisy() == null) world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j].getDaisy() == null) world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j + 1].getDaisy() == null) world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i][j + 1].getDaisy() == null) world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j + 1].getDaisy() == null) world[i + 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-
-    } else if (j == col - 1) {
-
-      if(world[i - 1][j].getDaisy() == null) world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j].getDaisy() == null) world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j - 1].getDaisy() == null) world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i][j - 1].getDaisy() == null) world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j - 1].getDaisy() == null) world[i + 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    } else {
-
-      if(world[i - 1][j - 1].getDaisy() == null) world[i - 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j].getDaisy() == null) world[i - 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i - 1][j + 1].getDaisy() == null) world[i - 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i][j - 1].getDaisy() == null) world[i][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i][j + 1].getDaisy() == null) world[i][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j - 1].getDaisy() == null) world[i + 1][j - 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j].getDaisy() == null) world[i + 1][j].setDaisy(new Daisy(0, daisy.getDaisyType()));
-      if(world[i + 1][j + 1].getDaisy() == null) world[i + 1][j + 1].setDaisy(new Daisy(0, daisy.getDaisyType()));
-    }
-  }
-
-
-    public void updateGlobalTemperature () {
-      double sum = 0;
-
-      for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-          sum += world[i][j].getTemperature();
-
-        }
-        globalTemperature = sum / (row * col);
-      }
-    }
-
-    public void copyTheWorld () {
-      for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-//        Patch patch = world[i][j];
-//        copyWorld[i][j] = patch;
-          copyWorld[i][j].setDaisy(world[i][j].getDaisy());
-          if (world[i][j].getDaisy() == null) {
-            copyWorld[i][j].setDaisy(world[i][j].getDaisy());
-          } else {
-            copyWorld[i][j].getDaisy().setAge(world[i][j].getDaisy().getAge());
-            copyWorld[i][j].getDaisy().setDaisyType(world[i][j].getDaisy().getDaisyType());
-          }
-          copyWorld[i][j].setTemperature(world[i][j].getTemperature());
-          copyWorld[i][j].setColor(world[i][j].getColor());
-
-        }
-      }
-    }
-
-    public void justifTem () {
-      for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-          world[i][j].setTemperature(20);
-        }
-      }
-    }
-
-    public void updateWorld () {
-      copyTheWorld();
-
-      patchCalTemperature();
-      diffuseTemperature();
-      updateGlobalTemperature();
-      updateDaisyAge();
-      //justifTem();
-      bornNewDaisy();
-
-//    System.out.println(globalTemperature);
-
-//    System.out.println(world[0][0].getTemperature());
-//    System.out.println(seedThreshold);
-      double randomdouble = Math.random();
-//    System.out.println(randomdouble);
-    }
-  }
+}

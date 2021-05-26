@@ -1,10 +1,13 @@
 package com.group2;
 
+/**
+ * Daisy
+ */
 public class Daisy {
   private int age;
   private DaisyType daisyType;
-  private double albedoBlack = 0.8;
-  private double albedoWhite = 0.4;
+  private double albedoBlack = 0.4;
+  private double albedoWhite = 0.8;
 
   public Daisy(DaisyType daisyType) {
     this.daisyType = daisyType;
