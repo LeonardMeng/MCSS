@@ -1,6 +1,7 @@
 package com.group2;
 
 public class Patch {
+  // Parameter initial
   private Daisy daisy;
   private double albedo = 0;
   private double temperature;
@@ -34,36 +35,42 @@ public class Patch {
     temperature = (temperature + localHeating) / 2;
   }
 
-
+  // Return the temperature
   public double getTemperature() {
     return temperature;
   }
 
+  // Set the temperature in this class
   public void setTemperature(double temperature) {
     this.temperature = temperature;
   }
 
+  // Return the Daisy
   public Daisy getDaisy() {
     return daisy;
   }
 
+  // Set the daisy in this class
   public void setDaisy(Daisy daisy) {
     this.daisy = daisy;
   }
-  //remove the dead daisy
+  // Remove the dead daisy
   public void goDieDaisy(){
     this.daisy = null;
 
   }
-
+  
+  // Get the albedo
   public double getAlbedo() {
     return albedo;
   }
-
+  
+  // Set the albedo in this class
   public void setAlbedo(double albedo) {
     this.albedo = albedo;
   }
 
+  // Out put formatting
   @Override
   public String toString() {
     return "Patch{" +
