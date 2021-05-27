@@ -43,6 +43,7 @@ public class World {
     }
     this.row = row;
     this.col = col;
+    this.solarLuminosity = solarLuminosity;
     this.startWhitePercent = startWhitePercent;
     this.startBlackPercent = startBlackPercent;
     this.startWhiteRandomly();
@@ -552,6 +553,16 @@ public class World {
     }
   }
 
+  public void crustalChange(double prob){
+    for (int i = 0; i < row; i++) {
+      for (int j = 0; j < col; j++) {
+        double randomdouble = Math.random();
+        if (randomdouble < prob && world[i][j].getDaisy() != null) {
+          world[i][j].setAlbedo(randomdouble);
+        }
+      }
+    }
+  }
   public Patch[][] getWorld() {
     return world;
   }

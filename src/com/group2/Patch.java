@@ -2,6 +2,7 @@ package com.group2;
 
 public class Patch {
   private Daisy daisy;
+  private double albedo = 0;
   private double temperature;
 
 
@@ -13,6 +14,10 @@ public class Patch {
   public void calTemperature(double albedoOfSurface, double solarLuminosity){
     double absorbedLuminosity =  0.0;
     double localHeating = 0;
+    //  For extension begin
+    if(albedo > 0)
+      albedoOfSurface = albedo;
+    // For extension end
     // Set the absorption rate according to whether there are daisies.
     if(daisy == null){
       absorbedLuminosity = (1 - albedoOfSurface) * solarLuminosity;
@@ -51,6 +56,13 @@ public class Patch {
 
   }
 
+  public double getAlbedo() {
+    return albedo;
+  }
+
+  public void setAlbedo(double albedo) {
+    this.albedo = albedo;
+  }
 
   @Override
   public String toString() {

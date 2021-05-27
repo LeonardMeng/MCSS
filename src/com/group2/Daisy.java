@@ -6,8 +6,8 @@ package com.group2;
 public class Daisy {
   private int age;
   private DaisyType daisyType;
-  private double albedoBlack = 0.4;
-  private double albedoWhite = 0.8;
+  private double albedoBlack = Parameters.BLACK_ALBEDO;
+  private double albedoWhite = Parameters.WHITE_ALBEDO;
 
   public Daisy(DaisyType daisyType) {
     this.daisyType = daisyType;
