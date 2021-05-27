@@ -11,7 +11,6 @@ import java.util.Scanner;
 
 public class Main {
 
-
   public static void main(String[] args) throws IOException {
     Scanner input = new Scanner(System.in);
 
@@ -29,6 +28,8 @@ public class Main {
       ;
       System.out.println("Invalid parameter, please try again");
     }
+    
+    // Set the generation
     int generation = 100;
     while (true) {
       System.out.println("Please input generation:");
@@ -39,7 +40,8 @@ public class Main {
       ;
       System.out.println("Invalid parameter, please try again");
     }
-
+  
+    // Select the scenario
     double solarLuminosity = 1.0;
     int scenario = 1;
     if (setting != 1) {
@@ -70,7 +72,8 @@ public class Main {
       }
 
     }
-
+    
+    // Daisy world initial
     if (setting == 1) {
       World world = new World(29, 29, 1.0, 20, 20);
       simWorld(world, 3, generation);
@@ -147,7 +150,8 @@ public class Main {
 
 
   }
-
+  
+  // Daisyworld simulation
   public static void simWorld(World world, int scenario, int generation) {
     DecimalFormat df = new DecimalFormat("######0.0000");
     int ticks = 0;
@@ -181,6 +185,7 @@ public class Main {
     save2CSV(whitePopulation, blackPopulation, temperature);
   }
 
+  // Extension
   public static void extensionWorld(World world, int scenario, double explosion, double extinct,
       int generation, double crustalChange, double iceAge, double solarLuminosity) {
     DecimalFormat df = new DecimalFormat("######0.0000");
@@ -240,7 +245,8 @@ public class Main {
     save2CSV(whitePopulation, blackPopulation, temperature);
 
   }
-
+  
+  // Save the result as .csv
   public static void save2CSV(List<Integer> whitePopulation, List<Integer> blackPopulation,
       List<Double> temperature) {
 
